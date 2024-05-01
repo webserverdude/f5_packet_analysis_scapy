@@ -2,12 +2,15 @@
 
 ## Introduction
 
+In this guide I want to demonstrate how you can use Scapy (https://scapy.net/) and tcpdump for reproducing and troubleshooting layer 2 issues with F5 BIG-IP devices.</br>
+Just in case you get into a fingerpointing situation...
+
+## Starting situation
+
 My customer uses a Bypass Tap to forward or mirror data traffic to inline tools such as IDS/IPS, WAF or threat intelligence systems. This ByPass Tap offers a feature called Network Failsafe (also known as Fail-to-Wire). This is a fault tolerance feature that protects the flow of data in the event of a power outage and/or system failure. It allows traffic to be rerouted while the inline tools (IDS/IPS, WAF or threat intelligence systems) are shutting down, restarting, or unexpectedly losing power (see red line named _Fallback_ in the picture below).
 
 Since the ByPass Tap itself does not have support for SSL decryption and re-encryption, an F5 BIG-IP SSL Orchestrator shall be introduced as an inline tool in a Layer 2 inbound topology. Tools directly connected to the Bypass Tap will be connected to the SSL Orchestrator for better visibility.</br>
 To check the status of the inline tools, the Bypass Tap sends health checks through the inline tools. What is sent on one interface must be seen on the other interace and vice versa.
-
-
 
 So if all is OK (health check is green), traffic will be routed to the SSL Orchestrator, decrypted and sent to the IDS/IPS and the TAP, and then reencrypted and sent back to the Bypass Tap.</br>
 If the Bypass Tap detects that the SSL Orchestrator is in a failure state, it will just forward the traffic to the switch.
@@ -42,7 +45,7 @@ The following topology was used for the lab:
 
 ![Lab Topology](/assets/lab-topology.png)
 
-I build a vWire configuration on the SSL Orchestrator, as in the customer's environment. A Linux system with Scapy (https://scapy.net/) installed was connected to Interface 1.1. With Scapy TCP, UDP and ARP packets can be crafted or sent like a replay from a Wireshark capture.
+I build a vWire configuration on the SSL Orchestrator, as in the customer's environment. A Linux system with Scapy installed was connected to Interface 1.1. With Scapy TCP, UDP and ARP packets can be crafted or sent like a replay from a Wireshark capture.
 Interface 1.3 was connected to another Linux system that should receive the ARP packets.
 All tcpdumps were captured on the F5 and analyzed on the admin system (not plotted).
 
