@@ -7,7 +7,7 @@ Just in case you get into a fingerpointing situation...
 
 ## Starting situation
 
-My customer uses a Bypass Tap to forward or mirror data traffic to inline tools such as IDS/IPS, WAF or threat intelligence systems. This ByPass Tap offers a feature called Network Failsafe (also known as Fail-to-Wire). This is a fault tolerance feature that protects the flow of data in the event of a power outage and/or system failure. It allows traffic to be rerouted while the inline tools (IDS/IPS, WAF or threat intelligence systems) are shutting down, restarting, or unexpectedly losing power (see red line named _Fallback_ in the picture below).
+This is a quite recent story from the trenches: My customer uses a Bypass Tap to forward or mirror data traffic to inline tools such as IDS/IPS, WAF or threat intelligence systems. This ByPass Tap offers a feature called Network Failsafe (also known as Fail-to-Wire). This is a fault tolerance feature that protects the flow of data in the event of a power outage and/or system failure. It allows traffic to be rerouted while the inline tools (IDS/IPS, WAF or threat intelligence systems) are shutting down, restarting, or unexpectedly losing power (see red line named _Fallback_ in the picture below).
 
 Since the ByPass Tap itself does not have support for SSL decryption and re-encryption, an F5 BIG-IP SSL Orchestrator shall be introduced as an inline tool in a Layer 2 inbound topology. Tools directly connected to the Bypass Tap will be connected to the SSL Orchestrator for better visibility.</br>
 To check the status of the inline tools, the Bypass Tap sends health checks through the inline tools. What is sent on one interface must be seen on the other interace and vice versa.
@@ -93,6 +93,8 @@ In the Wireshark analysis it can be seen that this packet is incoming on port 1.
 
 ![Wireshark analysis lab - good2](/assets/wireshark-lab-good2.png)
 
-## Conclusion
+## Moving on
 
-The F5 BIG-IP seems to drop ARP packets that are not RFC compliant, so the Bypass Tap from this vendor does not seem to be compatible with F5's SSL Orchestrator product.
+The F5 BIG-IP seems to drop ARP packets that are not RFC compliant, so the Bypass Tap from this vendor did not seem to be compatible with F5's SSL Orchestrator product.
+Based on my analyis the vendor was able to provided me with a beta release of the firmware that addressed this issue. After installing the updated firmware the issue was solved.
+The costumer could move on with the project.
