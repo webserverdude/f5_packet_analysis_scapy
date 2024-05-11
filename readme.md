@@ -12,7 +12,7 @@ This is a quite recent story from the trenches: My customer uses a Bypass Tap to
 Since the ByPass Tap itself does not have support for SSL decryption and re-encryption, an F5 BIG-IP SSL Orchestrator shall be introduced as an inline tool in a Layer 2 inbound topology. Tools directly connected to the Bypass Tap will be connected to the SSL Orchestrator for better visibility.</br>
 To check the status of the inline tools, the Bypass Tap sends health checks through the inline tools. What is sent on one interface must be seen on the other interace and vice versa.
 
-So if all is OK (health check is green), traffic will be routed to the SSL Orchestrator, decrypted and sent to the IDS/IPS and the TAP, and then reencrypted and sent back to the Bypass Tap.</br>
+So if all is OK (health check is green), traffic will be forwarded to the SSL Orchestrator, decrypted and sent to the IDS/IPS and the TAP, and then reencrypted and sent back to the Bypass Tap.</br>
 If the Bypass Tap detects that the SSL Orchestrator is in a failure state, it will just forward the traffic to the switch.
 
 This is the traffic flow of the health checks:
@@ -27,7 +27,7 @@ This results in the following topology:
 
 ## Problem description
 
-During commissioning of the new topology, it turned out that the health check packets are not routed through the vWire configuried on the BIG-IP.
+During commissioning of the new topology, it turned out that the health check packets are not forwarded through the vWire configuried on the BIG-IP.
 A packet analysis with Wireshark revealed that the manufacturer uses ARP-like packets with opcode 512 (HEX 02 00). This opcode is not defined in the RFC that describes ARP (https://datatracker.ietf.org/doc/html/rfc826), the RFC only describes the opcodes Request (2 or HEX 00 01) and 2 (2 or HEX 00 02).
 
 ![Wireshark analysis lab - customer](/assets/wireshark-customer-env.png)
@@ -95,6 +95,17 @@ In the Wireshark analysis it can be seen that this packet is incoming on port 1.
 
 ## Moving on
 
-The F5 BIG-IP seems to drop ARP packets that are not RFC compliant, so the Bypass Tap from this vendor did not seem to be compatible with F5's SSL Orchestrator product.
-Based on my analyis the vendor was able to provided me with a beta release of the firmware that addressed this issue. After installing the updated firmware the issue was solved.
-The costumer could move on with the project.
+It became evident that the BIG-IP was dropping ARP packets that failed to meet RFC compliance, rendering the Bypass Tap from this particular vendor seemingly incompatible with the BIG-IP. Following my analysis, the vendor was able to develop and provide a new firmware release addressing this issue. 
+To verify that the issue was resolved in this firmware release, my customer's setup, the exact same model of the Bypass Tap and a BIG-IP i5800, were deployed in my lab, where the new firmware underwent thorough testing. With this approach I could test the functionality and compatibility of the systems under controlled conditions.  
+
+In this Wireshark analysis it can be seen that the Healthcheck packets are incoming on port 1.1 and then forwarded to port 1.3 through the vWire (marked in green) and also the other way round, coming in on port 1.3 and then forwarded to port 1.1 (marked in pink).
+
+![Wireshark analysis lab new FW - good1](/assets/wireshark-lab-newFW1.png)
+
+Also now you can see that the packet is a proper gratuitous ARP reply (https://wiki.wireshark.org/Gratuitous_ARP).
+
+![Wireshark analysis lab new FW - good2](/assets/wireshark-lab-newFW2.png)
+
+Because the Healthcheck packets were not longer dropped by the BIG-IP, but were forwarded through the vWire the Bypass Tap subsequently marked the BIG-IP as healthy and available. 
+
+The new firmware resolved the issue. Consequently, my customer could confidently proceed with this project, free from the constraints imposed by the compatibility issue.
