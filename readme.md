@@ -93,7 +93,7 @@ In the Wireshark analysis it can be seen that this packet is incoming on port 1.
 
 ![Wireshark analysis lab - good2](/assets/wireshark-lab-good2.png)
 
-## Moving on
+## Solving the issue with the help of the vendor
 
 It became evident that the BIG-IP was dropping ARP packets that failed to meet RFC compliance, rendering the Bypass Tap from this particular vendor seemingly incompatible with the BIG-IP. Following my analysis, the vendor was able to develop and provide a new firmware release addressing this issue. 
 To verify that the issue was resolved in this firmware release, my customer's setup, the exact same model of the Bypass Tap and a BIG-IP i5800, were deployed in my lab, where the new firmware underwent thorough testing. With this approach I could test the functionality and compatibility of the systems under controlled conditions.  
